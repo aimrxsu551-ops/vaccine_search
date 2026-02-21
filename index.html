@@ -104,7 +104,7 @@
             displayResults(filteredData);
         }
 
-        // 5. แสดงผลลัพธ์
+      // 5. แสดงผลลัพธ์
         function displayResults(data) {
             const list = document.getElementById('resultList');
             list.innerHTML = "";
@@ -112,24 +112,44 @@
                 const div = document.createElement('div');
                 div.className = 'result-item';
                 div.innerHTML = `<div class="vaccine-name">${item.vaccine}</div><div class="vaccine-details">${item.details}</div>`;
-                // เมื่อกดที่รายการ ให้ส่งชื่อวัคซีนกลับไปที่แชท
-                div.onclick = () => sendToLine(item.vaccine);
+                
+                // แก้ให้ส่ง item.vaccine และ item.target ไปด้วย
+                div.onclick = () => sendToLine(item.vaccine, item.target);
+                
                 list.appendChild(div);
             });
         }
 
         // 6. ส่งข้อความกลับเข้าแชท LINE
-        function sendToLine(vaccineName) {
+        function sendToLine(vaccineName, target) {
+            // แปลงค่า Target จากอังกฤษใน Sheet ให้เป็นคำภาษาไทยที่ต้องการส่ง
+            let targetText = "";
+            let targetLower = target ? target.toLowerCase() : "";
+            
+            if (targetLower === "adult") {
+                targetText = "ผู้ใหญ่";
+            } else if (targetLower === "children") {
+                targetText = "เด็ก"; // หรือแก้เป็น "ในเด็ก" ได้ตามต้องการ
+            } else if (targetLower === "general") {
+                targetText = "เด็ก-ผู้ใหญ่";
+            }
+
+            // ประกอบร่างข้อความ เช่น "Influvac Tetra เด็ก-ผู้ใหญ่" หรือ "Avaxim 80 U เด็ก"
+            let finalMessage = vaccineName;
+            if (targetText !== "") {
+                finalMessage = vaccineName + " " + targetText; 
+            }
+
             if (liff.isLoggedIn() && liff.isInClient()) {
                 liff.sendMessages([
-                    { type: 'text', text: vaccineName } // ส่งชื่อวัคซีนกลับไปเป็นข้อความ
+                    { type: 'text', text: finalMessage } // ส่งข้อความที่ประกอบร่างแล้วกลับไป
                 ]).then(() => {
-                    liff.closeWindow(); // ปิดหน้าต่าง LIFF ทันทีเมื่อส่งเสร็จ
+                    liff.closeWindow(); 
                 }).catch((err) => {
                     console.error('Error sending message:', err);
                 });
             } else {
-                alert("คุณไม่ได้เปิดผ่านแอป LINE\nข้อมูลที่เลือกคือ: " + vaccineName);
+                alert("คุณไม่ได้เปิดผ่านแอป LINE\nข้อมูลที่เลือกคือ: " + finalMessage);
             }
         }
 
@@ -140,4 +160,5 @@
 </body>
 
 </html>
+
 
