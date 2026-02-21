@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาวัคซีน</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; padding: 20px; background-color: #f4f7f6; }
+        input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box;}
+        .result-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; }
+        .result-item:active { background: #e9ecef; }
+        .vaccine-name { font-weight: bold; font-size: 18px; color: #2c3e50; }
+        .vaccine-details { font-size: 14px; color: #7f8c8d; margin-top: 5px; }
+        #loading { text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+
+    <h2>ค้นหาวัคซีน 💉</h2>
+    <input type="text" id="searchInput" placeholder="พิมพ์ชื่อวัคซีน อาการ หรือคีย์เวิร์ด..." onkeyup="searchVaccine()">
+    
+    <div id="loading">กำลังโหลดข้อมูล...</div>
+    <div id="resultList"></div>
+
+    <script>
+        // 1. ใส่ Web App URL ของคุณที่ได้จาก GAS
+        const GAS_URL = "ใส่_GAS_URL_ของคุณที่นี่";
+        let vaccineData = [];
+
+        // 2. เริ่มต้น LIFF (เดี๋ยวเราจะเอา LIFF ID มาใส่ทีหลัง)
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: "ใส่_LIFF_ID_ของคุณที่นี่" });
+            } catch (err) {
+                console.error('LIFF Initialization failed', err);
+            }
+        }
+
+        // 3. ดึงข้อมูลจาก Google Sheet ทันทีที่เปิดหน้าเว็บ
+        async function fetchData() {
+            try {
+                const response = await fetch(GAS_URL);
+                vaccineData = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                displayResults(vaccineData); // โชว์ทั้งหมดก่อน
+            } catch (error) {
+                document.getElementById('loading').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+            }
+        }
+
+        // 4. ฟังก์ชันค้นหา (จับจาก Keywords)
+        function searchVaccine() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = vaccineData.filter(item => item.keywords.includes(query));
+            displayResults(filteredData);
+        }
+
+        // 5. แสดงผลลัพธ์
+        function displayResults(data) {
+            const list = document.getElementById('resultList');
+            list.innerHTML = "";
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `<div class="vaccine-name">${item.vaccine}</div><div class="vaccine-details">${item.details}</div>`;
+                // เมื่อกดที่รายการ ให้ส่งชื่อวัคซีนกลับไปที่แชท
+                div.onclick = () => sendToLine(item.vaccine);
+                list.appendChild(div);
+            });
+        }
+
+        // 6. ส่งข้อความกลับเข้าแชท LINE
+        function sendToLine(vaccineName) {
+            if (liff.isLoggedIn() && liff.isInClient()) {
+                liff.sendMessages([
+                    { type: 'text', text: vaccineName } // ส่งชื่อวัคซีนกลับไปเป็นข้อความ
+                ]).then(() => {
+                    liff.closeWindow(); // ปิดหน้าต่าง LIFF ทันทีเมื่อส่งเสร็จ
+                }).catch((err) => {
+                    console.error('Error sending message:', err);
+                });
+            } else {
+                alert("คุณไม่ได้เปิดผ่านแอป LINE\nข้อมูลที่เลือกคือ: " + vaccineName);
+            }
+        }
+
+        // โหลดทุกอย่างเมื่อเปิดหน้า
+        initializeLiff();
+        fetchData();
+    </script>
+</body>
+</html>
