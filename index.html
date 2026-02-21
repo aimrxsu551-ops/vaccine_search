@@ -5,14 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาวัคซีน</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        body { font-family: 'Kanit', sans-serif; padding: 20px; background-color: #f4f7f6; }
-        input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box;}
-        .result-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; }
-        .result-item:active { background: #e9ecef; }
-        .vaccine-name { font-weight: bold; font-size: 18px; color: #2c3e50; }
-        .vaccine-details { font-size: 14px; color: #7f8c8d; margin-top: 5px; }
-        #loading { text-align: center; color: #888; }
+<style>
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            padding: 15px; 
+            background-color: #F0F8FF; /* สีพื้นหลังโทนฟ้าอ่อน */
+            margin: 0;
+        }
+        h2 {
+            color: #0056b3; /* สีหัวข้อหลัก (น้ำเงิน) */
+            text-align: center;
+            margin-top: 10px;
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            font-size: 16px; 
+            border: 2px solid #add8e6; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus {
+            border-color: #0056b3; /* สีขอบช่องค้นหาเวลาแตะพิมพ์ */
+        }
+        .result-item { 
+            background: white; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border-radius: 10px; 
+            border-left: 6px solid #28a745; /* แถบสีเขียวด้านซ้ายของแต่ละรายการ */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            cursor: pointer; 
+            transition: all 0.2s ease-in-out;
+        }
+        .result-item:active { 
+            background: #e1f5fe; /* สีพื้นหลังเวลาเอานิ้วกด */
+            transform: scale(0.98); /* ย่อขนาดลงนิดนึงเวลาให้ดูเหมือนปุ่มโดนกด */
+        }
+        .vaccine-name { 
+            font-weight: bold; 
+            font-size: 16px; 
+            color: #333; 
+        }
+        .vaccine-details { 
+            font-size: 14px; 
+            color: #666; 
+            margin-top: 4px; 
+        }
+        #loading { 
+            text-align: center; 
+            color: #0056b3; 
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -92,3 +140,4 @@
 </body>
 
 </html>
+
