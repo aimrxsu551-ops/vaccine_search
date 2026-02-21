@@ -25,13 +25,13 @@
 
     <script>
         // 1. ใส่ Web App URL ของคุณที่ได้จาก GAS
-        const GAS_URL = "ใส่_GAS_URL_ของคุณที่นี่";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzyEPmiANzgid40gp4sYPUx8zYKIH1B8imdKDDZMt3uuXNYIEP0cXZtg5Za58kLjd-E/exec";
         let vaccineData = [];
 
         // 2. เริ่มต้น LIFF (เดี๋ยวเราจะเอา LIFF ID มาใส่ทีหลัง)
         async function initializeLiff() {
             try {
-                await liff.init({ liffId: "ใส่_LIFF_ID_ของคุณที่นี่" });
+                await liff.init({ liffId: "2009191617-wUZ6OjPp" });
             } catch (err) {
                 console.error('LIFF Initialization failed', err);
             }
@@ -90,4 +90,5 @@
         fetchData();
     </script>
 </body>
+
 </html>
