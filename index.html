@@ -5,62 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาวัคซีน</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<style>
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            padding: 15px; 
-            background-color: #F0F8FF; /* สีพื้นหลังโทนฟ้าอ่อน */
-            margin: 0;
-        }
-        h2 {
-            color: #0056b3; /* สีหัวข้อหลัก (น้ำเงิน) */
-            text-align: center;
-            margin-top: 10px;
-        }
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            font-size: 16px; 
-            border: 2px solid #add8e6; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-        }
-        input:focus {
-            border-color: #0056b3; /* สีขอบช่องค้นหาเวลาแตะพิมพ์ */
-        }
-        .result-item { 
-            background: white; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            border-radius: 10px; 
-            border-left: 6px solid #28a745; /* แถบสีเขียวด้านซ้ายของแต่ละรายการ */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            cursor: pointer; 
-            transition: all 0.2s ease-in-out;
-        }
-        .result-item:active { 
-            background: #e1f5fe; /* สีพื้นหลังเวลาเอานิ้วกด */
-            transform: scale(0.98); /* ย่อขนาดลงนิดนึงเวลาให้ดูเหมือนปุ่มโดนกด */
-        }
-        .vaccine-name { 
-            font-weight: bold; 
-            font-size: 16px; 
-            color: #333; 
-        }
-        .vaccine-details { 
-            font-size: 14px; 
-            color: #666; 
-            margin-top: 4px; 
-        }
-        #loading { 
-            text-align: center; 
-            color: #0056b3; 
-            font-weight: bold;
-            margin-top: 20px;
-        }
+    <style>
+        body { font-family: 'Kanit', sans-serif; padding: 15px; background-color: #F0F8FF; margin: 0; }
+        h2 { color: #0056b3; text-align: center; margin-top: 10px; }
+        input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #add8e6; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: #0056b3; }
+        .result-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; border-left: 6px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s ease-in-out; }
+        .result-item:active { background: #e1f5fe; transform: scale(0.98); }
+        .vaccine-name { font-weight: bold; font-size: 16px; color: #333; }
+        .vaccine-details { font-size: 14px; color: #666; margin-top: 4px; }
+        #loading { text-align: center; color: #0056b3; font-weight: bold; margin-top: 20px; }
+        .error-text { color: red; }
     </style>
 </head>
 <body>
@@ -72,39 +27,46 @@
     <div id="resultList"></div>
 
     <script>
-        // 1. ใส่ Web App URL ของคุณที่ได้จาก GAS
-        const GAS_URL = "const API_URL = "/api/search";
+        // ใช้ API ของ Vercel แทน GAS
+        const API_URL = "/api/search";
         let vaccineData = [];
 
-        // 2. เริ่มต้น LIFF (เดี๋ยวเราจะเอา LIFF ID มาใส่ทีหลัง)
+        // 1. นำ LIFF ID ของคุณมาใส่ตรงนี้นะคะ
+        const MY_LIFF_ID = "ใส่_LIFF_ID_ของคุณที่นี่"; 
+
         async function initializeLiff() {
             try {
-                await liff.init({ liffId: "2009191617-wUZ6OjPp" });
+                await liff.init({ liffId: MY_LIFF_ID });
             } catch (err) {
                 console.error('LIFF Initialization failed', err);
             }
         }
 
-        // 3. ดึงข้อมูลจาก Google Sheet ทันทีที่เปิดหน้าเว็บ
         async function fetchData() {
             try {
-                const response = await const response = await fetch(API_URL);
-                vaccineData = await response.json();
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // เช็คว่า Vercel ส่ง Error กลับมาไหม
+                if (data.error) {
+                    document.getElementById('loading').innerHTML = `<span class="error-text">❌ ระบบขัดข้อง: ${data.error}</span>`;
+                    return;
+                }
+                
+                vaccineData = data;
                 document.getElementById('loading').style.display = 'none';
-                displayResults(vaccineData); // โชว์ทั้งหมดก่อน
+                displayResults(vaccineData); 
             } catch (error) {
-                document.getElementById('loading').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+                document.getElementById('loading').innerHTML = '<span class="error-text">❌ เกิดข้อผิดพลาดในการโหลดข้อมูล (ติดต่อ API ไม่ได้)</span>';
             }
         }
 
-        // 4. ฟังก์ชันค้นหา (จับจาก Keywords)
         function searchVaccine() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filteredData = vaccineData.filter(item => item.keywords.includes(query));
+            const filteredData = vaccineData.filter(item => item.keywords && item.keywords.includes(query));
             displayResults(filteredData);
         }
 
-      // 5. แสดงผลลัพธ์
         function displayResults(data) {
             const list = document.getElementById('resultList');
             list.innerHTML = "";
@@ -112,54 +74,36 @@
                 const div = document.createElement('div');
                 div.className = 'result-item';
                 div.innerHTML = `<div class="vaccine-name">${item.vaccine}</div><div class="vaccine-details">${item.details}</div>`;
-                
-                // แก้ให้ส่ง item.vaccine และ item.target ไปด้วย
                 div.onclick = () => sendToLine(item.vaccine, item.target);
-                
                 list.appendChild(div);
             });
         }
 
-        // 6. ส่งข้อความกลับเข้าแชท LINE
         function sendToLine(vaccineName, target) {
-            // แปลงค่า Target จากอังกฤษใน Sheet ให้เป็นคำภาษาไทยที่ต้องการส่ง
             let targetText = "";
             let targetLower = target ? target.toLowerCase() : "";
             
             if (targetLower === "adult") {
                 targetText = "ผู้ใหญ่";
             } else if (targetLower === "children") {
-                targetText = "เด็ก"; // หรือแก้เป็น "ในเด็ก" ได้ตามต้องการ
+                targetText = "เด็ก"; 
             } else if (targetLower === "general") {
                 targetText = "เด็ก-ผู้ใหญ่";
             }
 
-            // ประกอบร่างข้อความ เช่น "Influvac Tetra เด็ก-ผู้ใหญ่" หรือ "Avaxim 80 U เด็ก"
-            let finalMessage = vaccineName;
-            if (targetText !== "") {
-                finalMessage = vaccineName + " " + targetText; 
-            }
+            let finalMessage = targetText !== "" ? `${vaccineName} ${targetText}` : vaccineName;
 
             if (liff.isLoggedIn() && liff.isInClient()) {
-                liff.sendMessages([
-                    { type: 'text', text: finalMessage } // ส่งข้อความที่ประกอบร่างแล้วกลับไป
-                ]).then(() => {
-                    liff.closeWindow(); 
-                }).catch((err) => {
-                    console.error('Error sending message:', err);
-                });
+                liff.sendMessages([ { type: 'text', text: finalMessage } ])
+                .then(() => { liff.closeWindow(); })
+                .catch((err) => { console.error('Error sending message:', err); });
             } else {
-                alert("คุณไม่ได้เปิดผ่านแอป LINE\nข้อมูลที่เลือกคือ: " + finalMessage);
+                alert("คุณไม่ได้เปิดผ่านแอป LINE\\nข้อมูลที่เลือกคือ: " + finalMessage);
             }
         }
 
-        // โหลดทุกอย่างเมื่อเปิดหน้า
         initializeLiff();
         fetchData();
     </script>
 </body>
-
 </html>
-
-
-
