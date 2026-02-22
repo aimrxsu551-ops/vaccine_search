@@ -73,7 +73,7 @@
 
     <script>
         // 1. ใส่ Web App URL ของคุณที่ได้จาก GAS
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzyEPmiANzgid40gp4sYPUx8zYKIH1B8imdKDDZMt3uuXNYIEP0cXZtg5Za58kLjd-E/exec";
+        const GAS_URL = "const API_URL = "/api/search";
         let vaccineData = [];
 
         // 2. เริ่มต้น LIFF (เดี๋ยวเราจะเอา LIFF ID มาใส่ทีหลัง)
@@ -88,7 +88,7 @@
         // 3. ดึงข้อมูลจาก Google Sheet ทันทีที่เปิดหน้าเว็บ
         async function fetchData() {
             try {
-                const response = await fetch(GAS_URL);
+                const response = await const response = await fetch(API_URL);
                 vaccineData = await response.json();
                 document.getElementById('loading').style.display = 'none';
                 displayResults(vaccineData); // โชว์ทั้งหมดก่อน
@@ -160,5 +160,6 @@
 </body>
 
 </html>
+
 
 
